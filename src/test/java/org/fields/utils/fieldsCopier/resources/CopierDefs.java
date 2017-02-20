@@ -1,4 +1,4 @@
-package test.resources;
+package org.fields.utils.fieldsCopier.resources;
 
 import java.util.Random;
 
@@ -70,6 +70,8 @@ public class CopierDefs {
 			this.longExemplo = longExemplo;
 		}
 	}
+	
+	public static class ObjectPOJOExtended extends ObjectPOJO {}
 
 	public static class ObjectPOJO {
 

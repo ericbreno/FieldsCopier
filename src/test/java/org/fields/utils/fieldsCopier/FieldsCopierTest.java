@@ -1,18 +1,17 @@
-package test;
+package org.fields.utils.fieldsCopier;
 
 import java.lang.reflect.Field;
 
 import javax.naming.OperationNotSupportedException;
 
+import org.fields.utils.fieldsCopier.resources.CopierDefs;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.InvalidTypeForConstruct;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectDTO;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJO;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJOExtended;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.SimpleTypePrivateConstruct;
 import org.junit.Assert;
 import org.junit.Test;
-
-import main.FieldsCopier;
-import test.resources.CopierDefs;
-import test.resources.CopierDefs.InvalidTypeForConstruct;
-import test.resources.CopierDefs.ObjectDTO;
-import test.resources.CopierDefs.ObjectPOJO;
-import test.resources.CopierDefs.SimpleTypePrivateConstruct;
 
 public class FieldsCopierTest {
 
@@ -20,6 +19,18 @@ public class FieldsCopierTest {
 	public void basicTestDTOPOJO() {
 		ObjectDTO dto = CopierDefs.newDTO();
 		ObjectPOJO pojo = new CopierDefs.ObjectPOJO();
+
+		Assert.assertNotEquals(dto, pojo);
+
+		FieldsCopier.copy(pojo, dto);
+
+		assertProps(dto, pojo);
+	}
+	
+	@Test
+	public void basicTestDTOPOJOExtended() {
+		ObjectDTO dto = CopierDefs.newDTO();
+		ObjectPOJO pojo = new CopierDefs.ObjectPOJOExtended();
 
 		Assert.assertNotEquals(dto, pojo);
 
@@ -39,11 +50,19 @@ public class FieldsCopierTest {
 
 		assertProps(dto, pojo);
 	}
-
+	
 	@Test
 	public void basicTestPOJOConstructor() throws OperationNotSupportedException {
 		ObjectDTO dto = CopierDefs.newDTO();
 		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJO.class);
+
+		assertProps(dto, pojo);
+	}
+	
+	@Test
+	public void basicTestPOJOExtendedConstructor() throws OperationNotSupportedException {
+		ObjectDTO dto = CopierDefs.newDTO();
+		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
 
 		assertProps(dto, pojo);
 	}

@@ -1,4 +1,4 @@
-package main;
+package org.fields.utils.fieldsCopier;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
