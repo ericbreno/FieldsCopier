@@ -83,9 +83,6 @@
 						</goals>
 						<phase>deploy</phase>
 					</execution>
-					<execution>
-						<id>attach-sources</id>
-					</execution>
 				</executions>
 			</plugin>
 
