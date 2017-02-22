@@ -108,6 +108,21 @@
 				</configuration>
 			</plugin>
 
+			<!-- Make jar with sources -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+					<id>attach-sources</id>
+					<goals>
+						<goal>jar</goal>
+					</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Make this jar executable -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
