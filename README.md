@@ -4,7 +4,19 @@ General use class which copies properties between objects from same or different
 Copy all properties with equal names from one to another object, even with different types. 
 You can pass the destination object for the copy or it's type, which requires to have an empty constructor.
 
-See license.
+### Examples
+Copy properties from a type A object to another type B object
+```
+A orig;
+B dest;
+FieldsCopier.copy(dest, orig);
+```
+
+Or pass only B type
+```
+A orig;
+B dest = FieldsCopier.copyTo(orig, B.class);
+```
 
 ## How to use 
 ### Maven

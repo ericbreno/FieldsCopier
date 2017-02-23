@@ -35,9 +35,15 @@ public final class FieldsCopier {
 	 *         object.
 	 * @throws OperationNotSupportedException
 	 *             Thrown if there are no empty constructors for the given type.
+	 * @throws SecurityException
+	 *             If the security manager is present and one of the security
+	 *             conditions are violated.
+	 * @throws IllegalArgumentException
+	 *             If two properties with same name have incompatible types.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T, E> E copyTo(T origin, Class<E> dest) throws OperationNotSupportedException {
+	public static <T, E> E copyTo(T origin, Class<E> dest)
+			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
 		Constructor<?>[] constructors = dest.getDeclaredConstructors();
 		for (Constructor<?> constructor : constructors) {
 			E destObject = (E) tryConstruct(constructor);
@@ -87,8 +93,13 @@ public final class FieldsCopier {
 	 *            Destination object for copy.
 	 * @param orig
 	 *            Origin object for copy.
+	 * @throws IllegalArgumentException
+	 *             If two properties with same name have incompatible types.
+	 * @throws SecurityException
+	 *             If the security manager is present and one of the security
+	 *             conditions are violated.
 	 */
-	public static <T, E> void copy(T dest, E orig) {
+	public static <T, E> void copy(T dest, E orig) throws IllegalArgumentException, SecurityException {
 		Class<? extends Object> destClazz = dest.getClass();
 		Field[] fieldsDest = destClazz.getDeclaredFields();
 		Class<? extends Object> origClazz = orig.getClass();
@@ -98,8 +109,10 @@ public final class FieldsCopier {
 			try {
 				Field fieldOrig = origClazz.getDeclaredField(fieldName);
 				setValue(dest, orig, fieldDest, fieldOrig);
-			} catch (NoSuchFieldException | SecurityException e) {
-				// TODO: maybe you'll want to handle this.
+			} catch (NoSuchFieldException e) {
+				// There's no problem in NoSuchFieldsException, since different
+				// classes may have not same fields, and only the ones with same
+				// name are copied.
 			}
 		}
 	}
@@ -117,8 +130,12 @@ public final class FieldsCopier {
 	 *            Destination object field.
 	 * @param fieldOrig
 	 *            Origin object field.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             If two properties with same name have incompatible types.
 	 */
-	private static <T, E> void setValue(T dest, E orig, Field fieldDest, Field fieldOrig) {
+	private static <T, E> void setValue(T dest, E orig, Field fieldDest, Field fieldOrig)
+			throws IllegalArgumentException {
 		boolean destState = fieldDest.isAccessible();
 		boolean origState = fieldOrig.isAccessible();
 
@@ -128,8 +145,8 @@ public final class FieldsCopier {
 		try {
 			Object origVal = fieldOrig.get(orig);
 			fieldDest.set(dest, origVal);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			// TODO: maybe you'll want to handle this.
+		} catch (IllegalAccessException e) {
+			// Never thrown
 		} finally {
 			fieldDest.setAccessible(destState);
 			fieldOrig.setAccessible(origState);
