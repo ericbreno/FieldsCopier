@@ -18,7 +18,14 @@ A orig;
 B dest = FieldsCopier.copyTo(orig, B.class);
 ```
 
-## How to use 
+## Running the tests
+
+To run tests
+``` 
+mvn test
+```
+
+## Installing
 ### Maven
 FieldsCopier with maven
 
@@ -52,6 +59,10 @@ Attach sources
     <classifier>sources</classifier>
 </dependency>
 ```
+
+## Built With
+
+* [Maven](https://maven.apache.org/) - Dependency Management
 
 ## Authors
 * **Eric Breno**
