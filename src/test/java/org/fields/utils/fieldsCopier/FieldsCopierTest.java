@@ -1,6 +1,9 @@
 package org.fields.utils.fieldsCopier;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -20,21 +23,37 @@ public class FieldsCopierTest {
 		ObjectDTO dto = CopierDefs.newDTO();
 		ObjectPOJO pojo = new CopierDefs.ObjectPOJO();
 
+		System.out.println(Arrays.toString(CopierDefs.ObjectPOJOExtended.class.getDeclaredFields()));
+
 		Assert.assertNotEquals(dto, pojo);
 
 		FieldsCopier.copy(pojo, dto);
 
 		assertProps(dto, pojo);
 	}
-	
+
 	@Test
 	public void basicTestDTOPOJOExtended() {
 		ObjectDTO dto = CopierDefs.newDTO();
-		ObjectPOJO pojo = new CopierDefs.ObjectPOJOExtended();
+		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
 
 		Assert.assertNotEquals(dto, pojo);
 
 		FieldsCopier.copy(pojo, dto);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void basicTestPOJOExtendedDTO() {
+		ObjectDTO dto = new CopierDefs.ObjectDTO();
+		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
+		pojo.setIntegerExemplo(23);
+		pojo.setStringExemplo("Teste");
+
+		Assert.assertNotEquals(dto, pojo);
+
+		FieldsCopier.copy(dto, pojo);
 
 		assertProps(dto, pojo);
 	}
@@ -50,7 +69,7 @@ public class FieldsCopierTest {
 
 		assertProps(dto, pojo);
 	}
-	
+
 	@Test
 	public void basicTestPOJOConstructor() throws OperationNotSupportedException {
 		ObjectDTO dto = CopierDefs.newDTO();
@@ -58,11 +77,11 @@ public class FieldsCopierTest {
 
 		assertProps(dto, pojo);
 	}
-	
+
 	@Test
 	public void basicTestPOJOExtendedConstructor() throws OperationNotSupportedException {
 		ObjectDTO dto = CopierDefs.newDTO();
-		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
+		CopierDefs.ObjectPOJOExtended pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
 
 		assertProps(dto, pojo);
 	}
@@ -101,18 +120,14 @@ public class FieldsCopierTest {
 	 */
 	private void assertProps(Object o1, Object o2) {
 		Class<? extends Object> o1Clazz = o1.getClass();
-		Field[] fieldsO1 = o1Clazz.getDeclaredFields();
 		Class<? extends Object> o2Clazz = o2.getClass();
+		Map<String, Field> fieldsDest = FieldsCopier.getAllFields(o1Clazz);
+		Map<String, Field> fieldsOrig = FieldsCopier.getAllFields(o2Clazz);
 
-		for (Field fieldO1 : fieldsO1) {
-			String fieldName = fieldO1.getName();
-			try {
-				Field fieldO2 = o2Clazz.getDeclaredField(fieldName);
-				assertValue(o1, o2, fieldO1, fieldO2);
-
-			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException e) {
-				// Suppressed for test purposes.
-			}
+		for (String fieldDestName : fieldsDest.keySet()) {
+			Field fieldO1 = fieldsDest.get(fieldDestName);
+			Field fieldO2 = fieldsOrig.get(fieldDestName);
+			assertValue(o1, o2, fieldO1, fieldO2);
 		}
 	}
 

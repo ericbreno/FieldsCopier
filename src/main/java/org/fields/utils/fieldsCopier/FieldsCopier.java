@@ -3,6 +3,8 @@ package org.fields.utils.fieldsCopier;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -101,20 +103,35 @@ public final class FieldsCopier {
 	 */
 	public static <T, E> void copy(T dest, E orig) throws IllegalArgumentException, SecurityException {
 		Class<? extends Object> destClazz = dest.getClass();
-		Field[] fieldsDest = destClazz.getDeclaredFields();
 		Class<? extends Object> origClazz = orig.getClass();
+		Map<String, Field> fieldsDest = getAllFields(destClazz);
+		Map<String, Field> fieldsOrig = getAllFields(origClazz);
 
-		for (Field fieldDest : fieldsDest) {
-			String fieldName = fieldDest.getName();
-			try {
-				Field fieldOrig = origClazz.getDeclaredField(fieldName);
-				setValue(dest, orig, fieldDest, fieldOrig);
-			} catch (NoSuchFieldException e) {
-				// There's no problem in NoSuchFieldsException, since different
-				// classes may have not same fields, and only the ones with same
-				// name are copied.
-			}
+		for (String fieldDestName : fieldsDest.keySet()) {
+			Field fieldDest = fieldsDest.get(fieldDestName);
+			Field fieldOrig = fieldsOrig.get(fieldDestName);
+			setValue(dest, orig, fieldDest, fieldOrig);
 		}
+	}
+
+	/**
+	 * Gets all fields from this class and all super classes except
+	 * {@code Object.class}
+	 * 
+	 * @param clazz
+	 *            Class to have fields extracted.
+	 * @return Map with all fields from the class and all super classes.
+	 */
+	public static Map<String, Field> getAllFields(Class<?> clazz) {
+		Map<String, Field> map = new HashMap<>();
+		// while it has a superclass
+		while (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Object.class)) {
+			for (Field field : clazz.getDeclaredFields()) {
+				map.putIfAbsent(field.getName(), field);
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return map;
 	}
 
 	/**

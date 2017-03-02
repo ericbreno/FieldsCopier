@@ -71,7 +71,9 @@ public class CopierDefs {
 		}
 	}
 	
-	public static class ObjectPOJOExtended extends ObjectPOJO {}
+	public static class ObjectPOJOExtended extends ObjectPOJO {
+				
+	}
 
 	public static class ObjectPOJO {
 
