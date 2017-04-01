@@ -55,7 +55,7 @@ Attach sources
 <dependency>
     <groupId>org.fields.utils</groupId>
     <artifactId>FieldsCopier</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <classifier>sources</classifier>
 </dependency>
 ```
