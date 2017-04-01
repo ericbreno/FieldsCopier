@@ -23,15 +23,48 @@ public final class FieldsCopier {
 	}
 
 	/**
+	 * Creates a copy from a given Object. This method calls
+	 * {@linkplain #copyTo(Object, Class)} with given object and it's type.
+	 * 
+	 * All rules and restrictions applied to {@linkplain #copyTo(Object, Class)}
+	 * and {@linkplain #copy(Object, Object)} are valid here.
+	 * 
+	 * @param <T>
+	 *            Origin and destination Object type.
+	 * @param origin
+	 *            Object to be copied.
+	 * @return New instance from given object type with same properties.
+	 * @throws OperationNotSupportedException
+	 *             Thrown if there are no empty constructors for the given type.
+	 * @throws SecurityException
+	 *             If the security manager is present and one of the security
+	 *             conditions are violated.
+	 * @throws IllegalArgumentException
+	 *             If two properties with same name have incompatible types.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T createCopy(T origin)
+			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		return (T) copyTo(origin, (Class<T>) origin.getClass());
+	}
+
+	/**
 	 * Copies fields from a given object to a new instance of another (or same)
 	 * class. Internally it creates a new instance for the class and the calls
-	 * {@link FieldsCopier.copy} method. An empty constructor (even if it's
-	 * private) is necessary for the given type, otherwise, and exception is
-	 * thrown.
+	 * {@linkplain #copy(Object, Object)} method. An empty constructor (even if
+	 * it's private) is necessary for the given type, otherwise, and exception
+	 * is thrown.
 	 * 
+	 * All rules and restrictions applied to {@linkplain #copy(Object, Object)}
+	 * are valid here.
+	 * 
+	 * @param <T>
+	 *            Origin Object type.
+	 * @param <E>
+	 *            Destination Object type.
 	 * @param origin
 	 *            Origin object.
-	 * @param dest
+	 * @param destClazz
 	 *            Destination type object.
 	 * @return New instance of the type given with properties copied from source
 	 *         object.
@@ -43,13 +76,13 @@ public final class FieldsCopier {
 	 * @throws IllegalArgumentException
 	 *             If two properties with same name have incompatible types.
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T, E> E copyTo(T origin, Class<E> dest)
+	public static <T, E> E copyTo(T origin, Class<E> destClazz)
 			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
-		Constructor<?>[] constructors = dest.getDeclaredConstructors();
-		for (Constructor<?> constructor : constructors) {
-			E destObject = (E) tryConstruct(constructor);
-			if (destObject == null) {
+		@SuppressWarnings("unchecked")
+		Constructor<E>[] constructors = (Constructor<E>[]) destClazz.getDeclaredConstructors();
+		for (Constructor<E> constructor : constructors) {
+			E destObject = tryConstruct(constructor);
+			if (isNull(destObject)) {
 				continue;
 			}
 			copy(destObject, origin);
@@ -63,6 +96,8 @@ public final class FieldsCopier {
 	 * constructor needs no parameters. In case of success, returns the new
 	 * instance, otherwise returns null.
 	 * 
+	 * @param <E>
+	 *            Object type to be instantiated.
 	 * @param constructor
 	 *            Constructor to try to be used.
 	 * @return Object instance in case of success, null otherwise.
@@ -91,6 +126,10 @@ public final class FieldsCopier {
 	 * successful, the value is copied from the origin to the destination
 	 * object.
 	 * 
+	 * @param <T>
+	 *            Origin Object type.
+	 * @param <E>
+	 *            Destination Object type.
 	 * @param dest
 	 *            Destination object for copy.
 	 * @param orig
@@ -110,13 +149,14 @@ public final class FieldsCopier {
 		for (String fieldDestName : fieldsDest.keySet()) {
 			Field fieldDest = fieldsDest.get(fieldDestName);
 			Field fieldOrig = fieldsOrig.get(fieldDestName);
-			setValue(dest, orig, fieldDest, fieldOrig);
+			if (!isNull(fieldDest) && !isNull(fieldOrig))
+				setValue(dest, orig, fieldDest, fieldOrig);
 		}
 	}
 
 	/**
 	 * Gets all fields from this class and all super classes except
-	 * {@code Object.class}
+	 * {@link Object}
 	 * 
 	 * @param clazz
 	 *            Class to have fields extracted.
@@ -124,8 +164,8 @@ public final class FieldsCopier {
 	 */
 	public static Map<String, Field> getAllFields(Class<?> clazz) {
 		Map<String, Field> map = new HashMap<>();
-		// while it has a superclass
-		while (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Object.class)) {
+		// while we're not in Object
+		while (!isNull(clazz) && !clazz.equals(Object.class)) {
 			for (Field field : clazz.getDeclaredFields()) {
 				map.putIfAbsent(field.getName(), field);
 			}
@@ -139,6 +179,10 @@ public final class FieldsCopier {
 	 * destination object. First, the accessibility to the field is set to true,
 	 * then, value from origin object is get and set in the destination object.
 	 * 
+	 * @param <T>
+	 *            Origin Object type.
+	 * @param <E>
+	 *            Destination Object type.
 	 * @param dest
 	 *            Destination object.
 	 * @param orig
@@ -168,5 +212,16 @@ public final class FieldsCopier {
 			fieldDest.setAccessible(destState);
 			fieldOrig.setAccessible(origState);
 		}
+	}
+
+	/**
+	 * Checks if an Object is {@code null}.
+	 * 
+	 * @param o
+	 *            Object.
+	 * @return True if {@code null}
+	 */
+	private static boolean isNull(Object o) {
+		return o == null;
 	}
 }

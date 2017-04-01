@@ -42,6 +42,9 @@ public class CopierDefs {
 		return r;
 	}
 
+	/**
+	 * Invalid type for copy, containing no empty constructor.
+	 */
 	public static class InvalidTypeForConstruct {
 
 		// should never be created
@@ -51,6 +54,9 @@ public class CopierDefs {
 		}
 	}
 
+	/**
+	 * Valid type for copy, with a single private constructor.
+	 */
 	public static class SimpleTypePrivateConstruct {
 
 		private Long longExemplo;
@@ -70,11 +76,46 @@ public class CopierDefs {
 			this.longExemplo = longExemplo;
 		}
 	}
-	
+
+	/**
+	 * Valid type for copy, with inheritance.
+	 */
 	public static class ObjectPOJOExtended extends ObjectPOJO {
-				
+
 	}
 
+	/**
+	 * Simplified type of {@link ObjectPOJO}.
+	 */
+	public static class SimplePOJO {
+		private Integer integerExemplo;
+
+		private String stringExemplo;
+
+		public SimplePOJO() {
+
+		}
+
+		public String getStringExemplo() {
+			return stringExemplo;
+		}
+
+		public void setStringExemplo(String stringExemplo) {
+			this.stringExemplo = stringExemplo;
+		}
+
+		public Integer getIntegerExemplo() {
+			return integerExemplo;
+		}
+
+		public void setIntegerExemplo(Integer integerExemplo) {
+			this.integerExemplo = integerExemplo;
+		}
+	}
+
+	/**
+	 * Valid type for copy.
+	 */
 	public static class ObjectPOJO {
 
 		private Long longExemplo;
@@ -284,6 +325,9 @@ public class CopierDefs {
 		}
 	}
 
+	/**
+	 * Valid type for copy.
+	 */
 	public static class ObjectDTO {
 		// transients example
 
@@ -436,7 +480,7 @@ public class CopierDefs {
 			if (getClass() != obj.getClass()) {
 				return false;
 			}
-			ObjectPOJO other = (ObjectPOJO) obj;
+			ObjectDTO other = (ObjectDTO) obj;
 			if (boolExemplo != other.boolExemplo) {
 				return false;
 			}

@@ -2,7 +2,6 @@ package org.fields.utils.fieldsCopier;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
@@ -12,6 +11,7 @@ import org.fields.utils.fieldsCopier.resources.CopierDefs.InvalidTypeForConstruc
 import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectDTO;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJO;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJOExtended;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.SimplePOJO;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.SimpleTypePrivateConstruct;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,75 +19,58 @@ import org.junit.Test;
 public class FieldsCopierTest {
 
 	@Test
-	public void basicTestDTOPOJO() {
-		ObjectDTO dto = CopierDefs.newDTO();
-		ObjectPOJO pojo = new CopierDefs.ObjectPOJO();
+	public void testCopyPojo() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectPOJO pojo1 = CopierDefs.newPOJO();
+		ObjectPOJO pojo2 = FieldsCopier.createCopy(pojo1);
 
-		System.out.println(Arrays.toString(CopierDefs.ObjectPOJOExtended.class.getDeclaredFields()));
-
-		Assert.assertNotEquals(dto, pojo);
-
-		FieldsCopier.copy(pojo, dto);
-
-		assertProps(dto, pojo);
+		Assert.assertEquals(pojo1, pojo2);
+		assertProps(pojo1, pojo2);
 	}
 
 	@Test
-	public void basicTestDTOPOJOExtended() {
-		ObjectDTO dto = CopierDefs.newDTO();
-		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
+	public void testPojoToPojo() {
+		ObjectPOJO pojo1 = new ObjectPOJO();
+		ObjectPOJO pojo2 = CopierDefs.newPOJO();
 
-		Assert.assertNotEquals(dto, pojo);
+		Assert.assertNotEquals(pojo1, pojo2);
 
-		FieldsCopier.copy(pojo, dto);
+		FieldsCopier.copy(pojo1, pojo2);
 
-		assertProps(dto, pojo);
+		Assert.assertEquals(pojo1, pojo2);
+		assertProps(pojo1, pojo2);
 	}
 
 	@Test
-	public void basicTestPOJOExtendedDTO() {
-		ObjectDTO dto = new CopierDefs.ObjectDTO();
-		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
-		pojo.setIntegerExemplo(23);
-		pojo.setStringExemplo("Teste");
-
-		Assert.assertNotEquals(dto, pojo);
-
-		FieldsCopier.copy(dto, pojo);
-
-		assertProps(dto, pojo);
-	}
-
-	@Test
-	public void basicTestPOJODTO() {
+	public void testPojoToDto() {
 		ObjectDTO dto = new CopierDefs.ObjectDTO();
 		ObjectPOJO pojo = CopierDefs.newPOJO();
-
-		Assert.assertNotEquals(dto, pojo);
-
 		FieldsCopier.copy(pojo, dto);
 
 		assertProps(dto, pojo);
 	}
 
 	@Test
-	public void basicTestPOJOConstructor() throws OperationNotSupportedException {
-		ObjectDTO dto = CopierDefs.newDTO();
-		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJO.class);
+	public void testPojoToSimplePojo() {
+		SimplePOJO simplePojo = new SimplePOJO();
+		simplePojo.setIntegerExemplo(new Integer(99));
+		simplePojo.setStringExemplo("Ata");
+		ObjectPOJO pojo = new ObjectPOJO();
+		FieldsCopier.copy(pojo, simplePojo);
 
-		assertProps(dto, pojo);
+		assertProps(simplePojo, pojo);
 	}
 
 	@Test
-	public void basicTestPOJOExtendedConstructor() throws OperationNotSupportedException {
-		ObjectDTO dto = CopierDefs.newDTO();
-		CopierDefs.ObjectPOJOExtended pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
+	public void testPojoToNewPojo() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectPOJO pojo1 = CopierDefs.newPOJO();
+		ObjectPOJO pojo2 = FieldsCopier.copyTo(pojo1, ObjectPOJO.class);
 
-		assertProps(dto, pojo);
+		Assert.assertEquals(pojo1, pojo2);
+		assertProps(pojo1, pojo2);
 	}
 
 	@Test
-	public void basicTestDTOConstructor() throws OperationNotSupportedException {
+	public void testPojoNewDto() throws OperationNotSupportedException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		ObjectDTO dto = FieldsCopier.copyTo(pojo, ObjectDTO.class);
 
@@ -95,11 +78,124 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void basicTestPrivateConstructor() throws OperationNotSupportedException {
+	public void testPojoNewSimplePojo()
+			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		SimplePOJO simplePojo = FieldsCopier.copyTo(pojo, SimplePOJO.class);
+
+		assertProps(pojo, simplePojo);
+	}
+
+	@Test
+	public void testPojoNewExtendedPojo()
+			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		ObjectPOJOExtended extendedPojo = FieldsCopier.copyTo(pojo, ObjectPOJOExtended.class);
+
+		assertProps(pojo, extendedPojo);
+	}
+
+	@Test
+	public void testCopyDto() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectDTO dto1 = CopierDefs.newDTO();
+		ObjectDTO dto2 = FieldsCopier.createCopy(dto1);
+		
+		Assert.assertEquals(dto1, dto2);
+		assertProps(dto1, dto2);
+	}
+
+	@Test
+	public void testDtoToDto() {
+		ObjectDTO dto1 = new ObjectDTO();
+		ObjectDTO dto2 = CopierDefs.newDTO();
+
+		Assert.assertNotEquals(dto1, dto2);
+
+		FieldsCopier.copy(dto1, dto2);
+
+		Assert.assertEquals(dto1, dto2);
+		assertProps(dto1, dto2);
+	}
+
+	@Test
+	public void testDtoToPojo() {
+		ObjectDTO dto = CopierDefs.newDTO();
+		ObjectPOJO pojo = new CopierDefs.ObjectPOJO();
+		FieldsCopier.copy(pojo, dto);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testDtoToPojoExtended() {
+		ObjectDTO dto = CopierDefs.newDTO();
+		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
+		FieldsCopier.copy(pojo, dto);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testDtoToNewDto() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+		ObjectDTO dto1 = CopierDefs.newDTO();
+		ObjectDTO dto2 = FieldsCopier.copyTo(dto1, ObjectDTO.class);
+
+		Assert.assertEquals(dto1, dto2);
+		assertProps(dto1, dto2);
+	}
+
+	@Test
+	public void testDtoNewPojo() throws OperationNotSupportedException {
+		ObjectDTO dto = CopierDefs.newDTO();
+		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJO.class);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testDtoNewPojoExtended() throws OperationNotSupportedException {
+		ObjectDTO dto = CopierDefs.newDTO();
+		CopierDefs.ObjectPOJOExtended pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testPrivateConstructor() throws OperationNotSupportedException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		SimpleTypePrivateConstruct dto = FieldsCopier.copyTo(pojo, SimpleTypePrivateConstruct.class);
 
 		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testPrivateConstructorInverse() throws OperationNotSupportedException {
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		SimpleTypePrivateConstruct dtoPrivateConstruct = FieldsCopier.copyTo(pojo, SimpleTypePrivateConstruct.class);
+		ObjectDTO dto = FieldsCopier.copyTo(dtoPrivateConstruct, ObjectDTO.class);
+
+		assertProps(dto, dtoPrivateConstruct);
+	}
+
+	@Test
+	public void testPojoExtendedToDto() {
+		ObjectDTO dto = new CopierDefs.ObjectDTO();
+		CopierDefs.ObjectPOJOExtended pojo = new CopierDefs.ObjectPOJOExtended();
+		pojo.setIntegerExemplo(23);
+		pojo.setStringExemplo("Teste");
+		FieldsCopier.copy(dto, pojo);
+
+		assertProps(dto, pojo);
+	}
+
+	@Test
+	public void testSimplePojoToPojo() {
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		SimplePOJO simplePojo = new SimplePOJO();
+
+		FieldsCopier.copy(simplePojo, pojo);
+
+		assertProps(pojo, simplePojo);
 	}
 
 	@Test(expected = OperationNotSupportedException.class)
@@ -127,7 +223,8 @@ public class FieldsCopierTest {
 		for (String fieldDestName : fieldsDest.keySet()) {
 			Field fieldO1 = fieldsDest.get(fieldDestName);
 			Field fieldO2 = fieldsOrig.get(fieldDestName);
-			assertValue(o1, o2, fieldO1, fieldO2);
+			if (fieldO2 != null && fieldO1 != null)
+				assertValue(o1, o2, fieldO1, fieldO2);
 		}
 	}
 
