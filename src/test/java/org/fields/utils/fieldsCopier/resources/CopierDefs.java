@@ -569,4 +569,11 @@ public class CopierDefs {
 			this.longTransient = longTransient;
 		}
 	}
+	
+	public static class DifferentType { 
+		private Long stringExemplo; 
+		
+		public DifferentType(){} 
+	}
+
 }

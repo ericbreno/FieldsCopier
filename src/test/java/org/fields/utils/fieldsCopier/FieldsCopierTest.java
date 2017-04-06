@@ -12,13 +12,14 @@ import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJO;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.ObjectPOJOExtended;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.SimplePOJO;
 import org.fields.utils.fieldsCopier.resources.CopierDefs.SimpleTypePrivateConstruct;
+import org.fields.utils.fieldsCopier.resources.CopierDefs.DifferentType;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class FieldsCopierTest {
 
 	@Test
-	public void testCopyPojo() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testCopyPojo() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo1 = CopierDefs.newPOJO();
 		ObjectPOJO pojo2 = FieldsCopier.createCopy(pojo1);
 
@@ -60,7 +61,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPojoToNewPojo() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testPojoToNewPojo() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo1 = CopierDefs.newPOJO();
 		ObjectPOJO pojo2 = FieldsCopier.copyTo(pojo1, ObjectPOJO.class);
 
@@ -69,7 +70,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPojoNewDto() throws OperationNotSupportedException {
+	public void testPojoNewDto() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		ObjectDTO dto = FieldsCopier.copyTo(pojo, ObjectDTO.class);
 
@@ -77,8 +78,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPojoNewSimplePojo()
-			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testPojoNewSimplePojo() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		SimplePOJO simplePojo = FieldsCopier.copyTo(pojo, SimplePOJO.class);
 
@@ -86,8 +86,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPojoNewExtendedPojo()
-			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testPojoNewExtendedPojo() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		ObjectPOJOExtended extendedPojo = FieldsCopier.copyTo(pojo, ObjectPOJOExtended.class);
 
@@ -95,10 +94,10 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testCopyDto() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testCopyDto() throws OperationNotSupportedException, InstantiationException {
 		ObjectDTO dto1 = CopierDefs.newDTO();
 		ObjectDTO dto2 = FieldsCopier.createCopy(dto1);
-		
+
 		Assert.assertEquals(dto1, dto2);
 		assertProps(dto1, dto2);
 	}
@@ -135,7 +134,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testDtoToNewDto() throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public void testDtoToNewDto() throws OperationNotSupportedException, InstantiationException {
 		ObjectDTO dto1 = CopierDefs.newDTO();
 		ObjectDTO dto2 = FieldsCopier.copyTo(dto1, ObjectDTO.class);
 
@@ -144,7 +143,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testDtoNewPojo() throws OperationNotSupportedException {
+	public void testDtoNewPojo() throws OperationNotSupportedException, InstantiationException {
 		ObjectDTO dto = CopierDefs.newDTO();
 		ObjectPOJO pojo = FieldsCopier.copyTo(dto, ObjectPOJO.class);
 
@@ -152,7 +151,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testDtoNewPojoExtended() throws OperationNotSupportedException {
+	public void testDtoNewPojoExtended() throws OperationNotSupportedException, InstantiationException {
 		ObjectDTO dto = CopierDefs.newDTO();
 		CopierDefs.ObjectPOJOExtended pojo = FieldsCopier.copyTo(dto, ObjectPOJOExtended.class);
 
@@ -160,7 +159,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPrivateConstructor() throws OperationNotSupportedException {
+	public void testPrivateConstructor() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		SimpleTypePrivateConstruct dto = FieldsCopier.copyTo(pojo, SimpleTypePrivateConstruct.class);
 
@@ -168,7 +167,7 @@ public class FieldsCopierTest {
 	}
 
 	@Test
-	public void testPrivateConstructorInverse() throws OperationNotSupportedException {
+	public void testPrivateConstructorInverse() throws OperationNotSupportedException, InstantiationException {
 		ObjectPOJO pojo = CopierDefs.newPOJO();
 		SimpleTypePrivateConstruct dtoPrivateConstruct = FieldsCopier.copyTo(pojo, SimpleTypePrivateConstruct.class);
 		ObjectDTO dto = FieldsCopier.copyTo(dtoPrivateConstruct, ObjectDTO.class);
@@ -198,10 +197,25 @@ public class FieldsCopierTest {
 	}
 
 	@Test(expected = OperationNotSupportedException.class)
-	public void testCopyToInvalidType() throws OperationNotSupportedException {
+	public void testCopyToInvalidType() throws OperationNotSupportedException, InstantiationException {
 		ObjectDTO dto = CopierDefs.newDTO();
 		FieldsCopier.copyTo(dto, InvalidTypeForConstruct.class);
 		Assert.fail("Should have failed.");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyPropertiesDifferentTypes() throws OperationNotSupportedException, InstantiationException {
+		DifferentType u = new DifferentType();
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		
+		FieldsCopier.copy(u, pojo);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyToPropertiesDifferentTypes() throws OperationNotSupportedException, InstantiationException {
+		ObjectPOJO pojo = CopierDefs.newPOJO();
+		
+		FieldsCopier.copyTo(pojo, DifferentType.class);
 	}
 
 	/**
@@ -239,7 +253,7 @@ public class FieldsCopierTest {
 			Object o2Value = fieldO2.get(o2);
 
 			Assert.assertEquals(o2Value, o1Value);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalAccessException e) {
 			// Suppressed for test purposes.
 		} finally {
 			fieldO1.setAccessible(o1State);

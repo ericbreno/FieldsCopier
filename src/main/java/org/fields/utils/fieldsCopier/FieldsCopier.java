@@ -9,9 +9,9 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 /**
- * Generic object properties copier.
+ * Generic object properties copier. <br>
  * 
- * @author Eric Breno - github.com/ericbreno/fields-copier
+ * @author Eric Breno - <a href="github.com/ericbreno">github.com/ericbreno</a>
  */
 public final class FieldsCopier {
 
@@ -24,8 +24,8 @@ public final class FieldsCopier {
 
 	/**
 	 * Creates a copy from a given Object. This method calls
-	 * {@linkplain #copyTo(Object, Class)} with given object and it's type.
-	 * 
+	 * {@linkplain #copyTo(Object, Class)} with given object and it's type. <br>
+	 * <br>
 	 * All rules and restrictions applied to {@linkplain #copyTo(Object, Class)}
 	 * and {@linkplain #copy(Object, Object)} are valid here.
 	 * 
@@ -36,15 +36,13 @@ public final class FieldsCopier {
 	 * @return New instance from given object type with same properties.
 	 * @throws OperationNotSupportedException
 	 *             Thrown if there are no empty constructors for the given type.
-	 * @throws SecurityException
-	 *             If the security manager is present and one of the security
-	 *             conditions are violated.
+	 * @throws InstantiationException
+	 *             Thrown if the constructor relies on an abstract class.
 	 * @throws IllegalArgumentException
 	 *             If two properties with same name have incompatible types.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T createCopy(T origin)
-			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+	public static <T> T createCopy(T origin) throws OperationNotSupportedException, InstantiationException {
 		return (T) copyTo(origin, (Class<T>) origin.getClass());
 	}
 
@@ -53,8 +51,8 @@ public final class FieldsCopier {
 	 * class. Internally it creates a new instance for the class and the calls
 	 * {@linkplain #copy(Object, Object)} method. An empty constructor (even if
 	 * it's private) is necessary for the given type, otherwise, and exception
-	 * is thrown.
-	 * 
+	 * is thrown. <br>
+	 * <br>
 	 * All rules and restrictions applied to {@linkplain #copy(Object, Object)}
 	 * are valid here.
 	 * 
@@ -70,16 +68,13 @@ public final class FieldsCopier {
 	 *         object.
 	 * @throws OperationNotSupportedException
 	 *             Thrown if there are no empty constructors for the given type.
-	 * @throws SecurityException
-	 *             If the security manager is present and one of the security
-	 *             conditions are violated.
-	 * @throws IllegalArgumentException
-	 *             If two properties with same name have incompatible types.
 	 * @throws InstantiationException
 	 *             Thrown if the constructor relies on an abstract class.
+	 * @throws IllegalArgumentException
+	 *             If two properties with same name have incompatible types.
 	 */
 	public static <T, E> E copyTo(T origin, Class<E> destClazz)
-			throws OperationNotSupportedException, SecurityException, IllegalArgumentException, InstantiationException {
+			throws OperationNotSupportedException, InstantiationException {
 		@SuppressWarnings("unchecked")
 		Constructor<E>[] constructors = (Constructor<E>[]) destClazz.getDeclaredConstructors();
 		for (Constructor<E> constructor : constructors) {
@@ -113,8 +108,7 @@ public final class FieldsCopier {
 			try {
 				E destObject = (E) constructor.newInstance();
 				return destObject;
-			} catch (IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				// TODO: maybe you'll want to handle this.
 			} finally {
 				constructor.setAccessible(constructorState);
@@ -140,11 +134,8 @@ public final class FieldsCopier {
 	 *            Origin object for copy.
 	 * @throws IllegalArgumentException
 	 *             If two properties with same name have incompatible types.
-	 * @throws SecurityException
-	 *             If the security manager is present and one of the security
-	 *             conditions are violated.
 	 */
-	public static <T, E> void copy(T dest, E orig) throws IllegalArgumentException, SecurityException {
+	public static <T, E> void copy(T dest, E orig) {
 		Class<? extends Object> destClazz = dest.getClass();
 		Class<? extends Object> origClazz = orig.getClass();
 		Map<String, Field> fieldsDest = getAllFields(destClazz);
@@ -199,8 +190,7 @@ public final class FieldsCopier {
 	 * @throws IllegalArgumentException
 	 *             If two properties with same name have incompatible types.
 	 */
-	private static <T, E> void setValue(T dest, E orig, Field fieldDest, Field fieldOrig)
-			throws IllegalArgumentException {
+	private static <T, E> void setValue(T dest, E orig, Field fieldDest, Field fieldOrig) {
 		boolean destState = fieldDest.isAccessible();
 		boolean origState = fieldOrig.isAccessible();
 
