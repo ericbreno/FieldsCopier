@@ -75,9 +75,11 @@ public final class FieldsCopier {
 	 *             conditions are violated.
 	 * @throws IllegalArgumentException
 	 *             If two properties with same name have incompatible types.
+	 * @throws InstantiationException
+	 *             Thrown if the constructor relies on an abstract class.
 	 */
 	public static <T, E> E copyTo(T origin, Class<E> destClazz)
-			throws OperationNotSupportedException, SecurityException, IllegalArgumentException {
+			throws OperationNotSupportedException, SecurityException, IllegalArgumentException, InstantiationException {
 		@SuppressWarnings("unchecked")
 		Constructor<E>[] constructors = (Constructor<E>[]) destClazz.getDeclaredConstructors();
 		for (Constructor<E> constructor : constructors) {
@@ -101,15 +103,17 @@ public final class FieldsCopier {
 	 * @param constructor
 	 *            Constructor to try to be used.
 	 * @return Object instance in case of success, null otherwise.
+	 * @throws InstantiationException
+	 *             Thrown if the constructor relies on an abstrac class.
 	 */
-	private static <E> E tryConstruct(Constructor<E> constructor) {
+	private static <E> E tryConstruct(Constructor<E> constructor) throws InstantiationException {
 		boolean constructorState = constructor.isAccessible();
 		if (constructor.getParameterCount() == 0) {
 			constructor.setAccessible(true);
 			try {
 				E destObject = (E) constructor.newInstance();
 				return destObject;
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				// TODO: maybe you'll want to handle this.
 			} finally {
