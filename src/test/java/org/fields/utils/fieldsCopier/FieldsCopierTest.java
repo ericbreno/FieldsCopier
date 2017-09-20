@@ -218,6 +218,26 @@ public class FieldsCopierTest {
 		FieldsCopier.copyTo(pojo, DifferentType.class);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyNullOrigin() {
+		FieldsCopier.copy(new Object(), null);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyNullDestiny() {
+		FieldsCopier.copy(null, new Object());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyNullClass() throws OperationNotSupportedException, InstantiationException {
+		FieldsCopier.copyTo(new Object(), null);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCopyNullObject() throws OperationNotSupportedException, InstantiationException {
+		FieldsCopier.createCopy(null);
+	}
+	
 	/**
 	 * For fields with same name in two given objects, asserts if they have
 	 * equal values.

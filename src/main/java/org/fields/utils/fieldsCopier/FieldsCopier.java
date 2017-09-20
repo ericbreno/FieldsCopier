@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -14,6 +15,10 @@ import javax.naming.OperationNotSupportedException;
  * @author Eric Breno - <a href="github.com/ericbreno">github.com/ericbreno</a>
  */
 public final class FieldsCopier {
+
+	private static final String DESTINY = "Destiny object";
+	private static final String CLASS = "Class";
+	private static final String ORIGIN = "Origin object";
 
 	/**
 	 * I don't think we need instances for this class, let's just make sure no
@@ -43,6 +48,7 @@ public final class FieldsCopier {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T createCopy(T origin) throws OperationNotSupportedException, InstantiationException {
+		checkNull(origin, ORIGIN);
 		return (T) copyTo(origin, (Class<T>) origin.getClass());
 	}
 
@@ -75,17 +81,36 @@ public final class FieldsCopier {
 	 */
 	public static <T, E> E copyTo(T origin, Class<E> destClazz)
 			throws OperationNotSupportedException, InstantiationException {
+		checkNull(origin, ORIGIN);
+		checkNull(destClazz, CLASS);
 		@SuppressWarnings("unchecked")
 		Constructor<E>[] constructors = (Constructor<E>[]) destClazz.getDeclaredConstructors();
 		for (Constructor<E> constructor : constructors) {
 			E destObject = tryConstruct(constructor);
-			if (isNull(destObject)) {
+			if (Objects.isNull(destObject)) {
 				continue;
 			}
 			copy(destObject, origin);
 			return destObject;
 		}
-		throw new OperationNotSupportedException("Your destination class needs an empty construtor.");
+		throw new OperationNotSupportedException("Your destination class must have an empty construtor.");
+	}
+
+	/**
+	 * Validates if an Object is null. If null, {@link IllegalArgumentException}
+	 * is thrown.
+	 * 
+	 * @param obj
+	 *            Object to be verified.
+	 * @param objName
+	 *            Object name for error message.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             Thrown if object is {@code null}.
+	 */
+	private static <T> void checkNull(T obj, String objName) {
+		if (Objects.isNull(obj))
+			throw new IllegalArgumentException(String.format("%s must be not null", objName));
 	}
 
 	/**
@@ -136,6 +161,8 @@ public final class FieldsCopier {
 	 *             If two properties with same name have incompatible types.
 	 */
 	public static <T, E> void copy(T dest, E orig) {
+		checkNull(orig, ORIGIN);
+		checkNull(dest, DESTINY);
 		Class<? extends Object> destClazz = dest.getClass();
 		Class<? extends Object> origClazz = orig.getClass();
 		Map<String, Field> fieldsDest = getAllFields(destClazz);
@@ -144,7 +171,7 @@ public final class FieldsCopier {
 		for (String fieldDestName : fieldsDest.keySet()) {
 			Field fieldDest = fieldsDest.get(fieldDestName);
 			Field fieldOrig = fieldsOrig.get(fieldDestName);
-			if (!isNull(fieldDest) && !isNull(fieldOrig))
+			if (!Objects.isNull(fieldDest) && !Objects.isNull(fieldOrig))
 				setValue(dest, orig, fieldDest, fieldOrig);
 		}
 	}
@@ -158,9 +185,10 @@ public final class FieldsCopier {
 	 * @return Map with all fields from the class and all super classes.
 	 */
 	public static Map<String, Field> getAllFields(Class<?> clazz) {
+		checkNull(clazz, CLASS);
 		Map<String, Field> map = new HashMap<>();
 		// while we're not in Object
-		while (!isNull(clazz) && !clazz.equals(Object.class)) {
+		while (!Objects.isNull(clazz) && !Object.class.equals(clazz)) {
 			for (Field field : clazz.getDeclaredFields()) {
 				map.putIfAbsent(field.getName(), field);
 			}
@@ -206,16 +234,5 @@ public final class FieldsCopier {
 			fieldDest.setAccessible(destState);
 			fieldOrig.setAccessible(origState);
 		}
-	}
-
-	/**
-	 * Checks if an Object is {@code null}.
-	 * 
-	 * @param o
-	 *            Object.
-	 * @return True if {@code null}
-	 */
-	private static boolean isNull(Object o) {
-		return o == null;
 	}
 }
